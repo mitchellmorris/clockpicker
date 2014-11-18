@@ -528,7 +528,9 @@
 			}
 			value = inner ? (value === 0 ? 12 : value) : value === 0 ? 0 : value + 12;
 		} else {
-			if (roundBy5) {
+			if (this.options.quarterHours) {
+				value = (Math.round(value/15) * 15) % 60;;
+			} else if (roundBy5) {
 				value *= 5;
 			}
 			if (value === 60) {
