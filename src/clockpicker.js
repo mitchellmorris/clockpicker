@@ -154,7 +154,11 @@
 		}
 
 		// Minutes view
-		for (i = 0; i < 60; i += 5) {
+		var displayBy = 5;
+		if (this.options.quarterHours) {
+			displayBy = 15;
+		}
+		for (i = 0; i < 60; i += displayBy) {
 			tick = tickTpl.clone();
 			radian = i / 30 * Math.PI;
 			tick.css({
