@@ -507,7 +507,7 @@
 	ClockPicker.prototype.setHand = function(x, y, roundBy5, dragging){
 		var radian = Math.atan2(x, - y),
 			isHours = this.currentView === 'hours',
-			unit = Math.PI / (isHours || roundBy5 ? 6 : 30),
+			unit = Math.PI / (isHours || roundBy5 ? 6 : (!isHours&&this.options.quarterHours?2:30)),
 			z = Math.sqrt(x * x + y * y),
 			options = this.options,
 			inner = isHours && z < (outerRadius + innerRadius) / 2,
@@ -521,10 +521,10 @@
 
 		// Get the round value
 		value = Math.round(radian / unit);
-
+		
 		// Get the round radian
 		radian = value * unit;
-
+			
 		// Correct the hours or minutes
 		if (isHours) {
 			if (value === 12) {
@@ -532,13 +532,30 @@
 			}
 			value = inner ? (value === 0 ? 12 : value) : value === 0 ? 0 : value + 12;
 		} else {
-			if (this.options.quarterHours) {
-				value = (Math.round(value/15) * 15) % 60;
-			} else if (roundBy5) {
+			if (roundBy5) {
 				value *= 5;
 			}
-			if (value === 60) {
-				value = 0;
+			if (this.options.quarterHours) {
+				value *= 15;
+				switch (value) {
+					case 225:
+						value = 15;
+						break;
+					case 450:
+						value = 30;
+						break;
+					case 675:
+						value = 45;
+						break;
+					case 900:
+					case 60:
+						value = 0;
+						break;
+				}
+			} else {
+				if (value === 60) {
+					value = 0;
+				}
 			}
 		}
 
