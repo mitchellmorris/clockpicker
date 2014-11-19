@@ -234,12 +234,14 @@
 				if (self.currentView === 'hours') {
 					self.toggleView('minutes', duration / 2);
 				} else {
+					self.raiseCallback(self.options.beforeMinuteSelect);
 					if (options.autoclose) {
 						self.minutesView.addClass('clockpicker-dial-out');
 						setTimeout(function(){
 							self.done();
 						}, duration / 2);
 					}
+					self.raiseCallback(self.options.afterMinuteSelect);
 				}
 				plate.prepend(canvas);
 
@@ -290,12 +292,26 @@
 			this.canvas = canvas;
 		}
 
-		raiseCallback(this.options.init);
+		this.raiseCallback(this.options.init);
 	}
 
-	function raiseCallback(callbackFunction) {
+	ClockPicker.prototype.raiseCallback = function(callbackFunction) {
+		if (typeof this.hours == undefined) {
+			// Get the time
+			var value = ((this.input.prop('value') || this.options['default'] || '') + '').split(':');
+			if (value[0] === 'now') {
+				var now = new Date(+ new Date() + this.options.fromnow);
+				value = [
+					now.getHours(),
+					now.getMinutes()
+				];
+			}
+			this.hours = + value[0] || 0;
+			this.minutes = + value[1] || 0;
+		}
+		var value = leadingZero(this.hours) + ":" + leadingZero(this.minutes);
 		if (callbackFunction && typeof callbackFunction === "function") {
-			callbackFunction();
+			callbackFunction(value);
 		}
 	}
 
@@ -371,7 +387,7 @@
 			return;
 		}
 
-		raiseCallback(this.options.beforeShow);
+		this.raiseCallback(this.options.beforeShow);
 
 		var self = this;
 
@@ -429,12 +445,12 @@
 			}
 		});
 
-		raiseCallback(this.options.afterShow);
+		this.raiseCallback(this.options.afterShow);
 	};
 
 	// Hide popover
 	ClockPicker.prototype.hide = function(){
-		raiseCallback(this.options.beforeHide);
+		this.raiseCallback(this.options.beforeHide);
 
 		this.isShown = false;
 
@@ -444,14 +460,14 @@
 
 		this.popover.hide();
 
-		raiseCallback(this.options.afterHide);
+		this.raiseCallback(this.options.afterHide);
 	};
 
 	// Toggle to hours or minutes view
 	ClockPicker.prototype.toggleView = function(view, delay){
 		var raiseAfterHourSelect = false;
 		if (view === 'minutes' && $(this.hoursView).css("visibility") === "visible") {
-			raiseCallback(this.options.beforeHourSelect);
+			this.raiseCallback(this.options.beforeHourSelect);
 			raiseAfterHourSelect = true;
 		}
 		var isHours = view === 'hours',
@@ -477,7 +493,7 @@
 		}, duration);
 
 		if (raiseAfterHourSelect) {
-			raiseCallback(this.options.afterHourSelect);
+			this.raiseCallback(this.options.afterHourSelect);
 		}
 	};
 
@@ -609,7 +625,7 @@
 
 	// Hours and minuts is selected
 	ClockPicker.prototype.done = function() {
-		raiseCallback(this.options.beforeDone);
+		this.raiseCallback(this.options.beforeDone);
 		this.hide();
 		var last = this.input.prop('value'),
 			value = leadingZero(this.hours) + ':' + leadingZero(this.minutes);
@@ -620,7 +636,7 @@
 				this.element.trigger('change');
 			}
 		}
-		raiseCallback(this.options.afterDone);
+		this.raiseCallback(this.options.afterDone);
 	};
 
 	// Remove clockpicker from input
