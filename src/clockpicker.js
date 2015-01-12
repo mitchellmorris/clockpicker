@@ -128,7 +128,9 @@
 		this.spanMinutes.click($.proxy(this.toggleView, this, 'minutes'));
 
 		// Show or toggle
-		input.on('focus.clockpicker click.clockpicker', $.proxy(this.show, this));
+		if (options.onfocus) {
+			input.on('focus.clockpicker click.clockpicker', $.proxy(this.show, this));
+		}
 		addon.on('click.clockpicker', $.proxy(this.toggle, this));
 
 		// Build ticks
@@ -323,7 +325,8 @@
 		align: 'left',       // popover arrow align
 		donetext: '完成',    // done button text
 		autoclose: false,    // auto close when minute is selected
-		vibrate: true        // vibrate the device when dragging clock hand
+		vibrate: true,        // vibrate the device when dragging clock hand
+		onfocus: true
 	};
 
 	// Show or hide popover
@@ -427,9 +430,13 @@
 		this.locate();
 
 		this.isShown = true;
-
+		if (this.options.onfocus) {
+			triggers = 'click.clockpicker.' + this.id + ' focusin.clockpicker.' + this.id;
+		} else {
+			triggers = 'click.clockpicker.' + this.id;
+		}
 		// Hide when clicking or tabbing on any element except the clock, input and addon
-		$doc.on('click.clockpicker.' + this.id + ' focusin.clockpicker.' + this.id, function(e){
+		$doc.on(triggers, function(e){
 			var target = $(e.target);
 			if (target.closest(self.popover).length === 0 &&
 					target.closest(self.addon).length === 0 &&
@@ -453,9 +460,13 @@
 		this.raiseCallback(this.options.beforeHide);
 
 		this.isShown = false;
-
+		if (this.options.onfocus) {
+			triggers = 'click.clockpicker.' + this.id + ' focusin.clockpicker.' + this.id;
+		} else {
+			triggers = 'click.clockpicker.' + this.id;
+		}
 		// Unbinding events on document
-		$doc.off('click.clockpicker.' + this.id + ' focusin.clockpicker.' + this.id);
+		$doc.off(triggers);
 		$doc.off('keyup.clockpicker.' + this.id);
 
 		this.popover.hide();
@@ -642,7 +653,9 @@
 	// Remove clockpicker from input
 	ClockPicker.prototype.remove = function() {
 		this.element.removeData('clockpicker');
-		this.input.off('focus.clockpicker click.clockpicker');
+		if (this.options.onfocus) {
+			this.input.off('focus.clockpicker click.clockpicker');
+		}
 		this.addon.off('click.clockpicker');
 		if (this.isShown) {
 			this.hide();
