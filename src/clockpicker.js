@@ -397,7 +397,11 @@
 		// Initialize
 		if (! this.isAppended) {
 			// Append popover to body
-			$body = $(document.body).append(this.popover);
+			if (!this.options.container) {
+				$body = $(document.body).append(this.popover);
+			} else {
+				$body = $(this.options.container).append(this.popover);
+			}
 
 			// Reset position when resize
 			$win.on('resize.clockpicker' + this.id, function(){
